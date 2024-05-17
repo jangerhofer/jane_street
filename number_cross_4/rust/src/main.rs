@@ -15,7 +15,20 @@ fn main() {
         (4, vec![(2, 0), (2, 1), (3, 0), (3, 1)]),
     ];
 
-    let mut grid = Grid::new(dimension, initial_regions).unwrap();
+    let mut grid = match Grid::new(dimension, initial_regions) {
+        Ok(grid) => grid,
+        Err(e) => {
+            println!("Error initializing grid: {}", e);
+            return;
+        }
+    };
+
+    // Perform operations on the grid
+    // Example: set some cells
+    if let Some(number_cell) = cell::Cell::new_number(5, 1) {
+        grid.set_cell(1, 1, number_cell);
+    }
+    grid.set_cell(2, 2, cell::Cell::Shaded(2));
 
     // Display the grid
     println!("Grid:");

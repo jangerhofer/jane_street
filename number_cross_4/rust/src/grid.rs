@@ -1,6 +1,5 @@
 use crate::cell::Cell;
 use crate::region::Region;
-
 use std::collections::HashSet;
 
 pub struct Grid {
@@ -53,15 +52,22 @@ impl Grid {
             }
         }
 
-        Ok(Grid {
+        let grid = Grid {
             dimension,
             cells,
             regions,
-        })
+        };
+
+        // Check for duplicate cells in regions
+        if grid.check_duplicate_cells_in_regions() {
+            return Err("Duplicate cells found in multiple regions.".to_string());
+        }
+
+        Ok(grid)
     }
 
     // Set a cell to a new value and assign it to a region
-    fn set_cell(&mut self, row: usize, col: usize, cell: Cell) {
+    pub fn set_cell(&mut self, row: usize, col: usize, cell: Cell) {
         if row < self.dimension && col < self.dimension {
             match &cell {
                 Cell::Vacant(region) | Cell::Number(_, region) | Cell::Shaded(region) => {
@@ -81,7 +87,7 @@ impl Grid {
     }
 
     // Get a cell value
-    fn get_cell(&self, row: usize, col: usize) -> Option<&Cell> {
+    pub fn get_cell(&self, row: usize, col: usize) -> Option<&Cell> {
         if row < self.dimension && col < self.dimension {
             Some(&self.cells[row][col])
         } else {
