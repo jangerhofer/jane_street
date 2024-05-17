@@ -44,28 +44,22 @@ impl Grid {
         } else {
             let mut missing_cells: Vec<_> = all_cells.difference(&region_cells).collect();
             missing_cells.sort(); // Sort the list of missing cells
-            Err(format!(
-                "The following cell(s) are not in any region: {:?}",
-                missing_cells
-            ))
+            Err(format!("The following cell(s) are not in any region: {:?}", missing_cells))
         }
     }
 
     // Create a new grid with the given dimension and initial regions
     pub fn new(
         dimension: usize,
-        initial_regions: Vec<(usize, Vec<(usize, usize)>)>,
+        initial_regions: Vec<Vec<(usize, usize)>>,
     ) -> Result<Self, String> {
-        let mut cells = vec![vec![Cell::Vacant(0); dimension]; dimension];
+        let mut cells = vec![vec![Cell::Vacant; dimension]; dimension];
         let mut regions = Vec::new();
         let mut cell_set = HashSet::new();
 
         // Initialize regions based on the provided configuration
-        for (region_id, coordinates) in initial_regions {
-            if region_id >= regions.len() {
-                regions.resize_with(region_id + 1, || Region::new(region_id));
-            }
-            let region = &mut regions[region_id];
+        for coordinates in initial_regions {
+            let mut region = Region::new();
             for &(row, col) in &coordinates {
                 if row < dimension && col < dimension {
                     if !cell_set.insert((row, col)) {
@@ -74,10 +68,11 @@ impl Grid {
                             row, col
                         ));
                     }
-                    cells[row][col] = Cell::Vacant(region_id); // Initially mark as Vacant
+                    cells[row][col] = Cell::Vacant; // Initially mark as Vacant
                     region.add_cell(row, col);
                 }
             }
+            regions.push(region);
         }
 
         let grid = Grid {
@@ -99,19 +94,13 @@ impl Grid {
         Ok(grid)
     }
 
-    // Set a cell to a new value and assign it to a region
+    // Set a cell to a new value
     pub fn set_cell(&mut self, row: usize, col: usize, cell: Cell) {
         if row < self.dimension && col < self.dimension {
-            match &cell {
-                Cell::Vacant(region) | Cell::Number(_, region) | Cell::Shaded(region) => {
-                    // Ensure the region exists
-                    if *region >= self.regions.len() {
-                        for i in self.regions.len()..=*region {
-                            self.regions.push(Region::new(i));
-                        }
-                    }
-                    self.cells[row][col] = cell.clone();
-                    self.regions[*region].add_cell(row, col);
+            self.cells[row][col] = cell;
+            for region in &mut self.regions {
+                if region.cells.contains(&(row, col)) {
+                    region.add_cell(row, col);
                 }
             }
         } else {
@@ -133,9 +122,9 @@ impl Grid {
         for row in &self.cells {
             for cell in row {
                 match cell {
-                    Cell::Vacant(_) => print!(" . "),
-                    Cell::Number(n, _) => print!(" {} ", n),
-                    Cell::Shaded(_) => print!(" # "),
+                    Cell::Vacant => print!(" . "),
+                    Cell::Number(n) => print!(" {} ", n),
+                    Cell::Shaded => print!(" # "),
                 }
             }
             println!();
@@ -144,8 +133,8 @@ impl Grid {
 
     // Output the region information
     pub fn display_regions(&self) {
-        for region in &self.regions {
-            println!("Region {}: {:?}", region.id, region.cells);
+        for (index, region) in self.regions.iter().enumerate() {
+            println!("Region {}: {:?}", index, region.cells);
         }
     }
 }
