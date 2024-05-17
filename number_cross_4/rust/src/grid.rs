@@ -44,7 +44,10 @@ impl Grid {
         } else {
             let mut missing_cells: Vec<_> = all_cells.difference(&region_cells).collect();
             missing_cells.sort(); // Sort the list of missing cells
-            Err(format!("The following cell(s) are not in any region: {:?}", missing_cells))
+            Err(format!(
+                "The following cell(s) are not in any region: {:?}",
+                missing_cells
+            ))
         }
     }
 
@@ -136,5 +139,24 @@ impl Grid {
         for (index, region) in self.regions.iter().enumerate() {
             println!("Region {}: {:?}", index, region.cells);
         }
+    }
+
+    pub fn extract_sequences_from_row(&self, row: usize) -> Vec<String> {
+        let mut sequences = Vec::new();
+        let mut current_sequence = String::new();
+
+        for col in 0..self.dimension {
+            match &self.cells[row][col] {
+                Cell::Number(n) => current_sequence.push_str(&n.to_string()),
+                Cell::Vacant | Cell::Shaded => {
+                    if !current_sequence.is_empty() {
+                        sequences.push(current_sequence.clone());
+                        current_sequence.clear();
+                    }
+                }
+            }
+        }
+
+        sequences
     }
 }

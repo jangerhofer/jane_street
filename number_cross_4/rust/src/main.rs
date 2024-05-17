@@ -10,10 +10,10 @@ fn main() {
     // Initial regions configuration
     let initial_regions = vec![
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)],
-        vec![(0, 1), (1, 1), (2, 1), (3,1), (4, 1), (3, 2), (4, 2), ],
-        vec![(0, 2), (1, 2), (2, 2), (2, 3), (3, 3),(4,3), (4, 4), ],
-        vec![(0,3)],
-        vec![(1, 3), (0,4), (1, 4), (2, 4), (3, 4),],
+        vec![(0, 1), (1, 1), (2, 1), (3, 1), (4, 1), (3, 2), (4, 2)],
+        vec![(0, 2), (1, 2), (2, 2), (2, 3), (3, 3), (4, 3), (4, 4)],
+        vec![(0, 3)],
+        vec![(1, 3), (0, 4), (1, 4), (2, 4), (3, 4)],
     ];
 
     match Grid::new(dimension, initial_regions) {
@@ -23,6 +23,11 @@ fn main() {
             if let Some(number_cell) = cell::Cell::new_number(5) {
                 grid.set_cell(1, 1, number_cell);
             }
+
+            if let Some(number_cell) = cell::Cell::new_number(1) {
+                grid.set_cell(1, 2, number_cell);
+            }
+
             grid.set_cell(2, 2, cell::Cell::Shaded);
 
             // Display the grid
@@ -32,6 +37,8 @@ fn main() {
             // Display the regions
             println!("\nRegions:");
             grid.display_regions();
+
+            println!("{:?}", grid.extract_sequences_from_row(1));
         }
         Err(e) => {
             println!("Error initializing grid: {}", e);
