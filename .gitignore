@@ -1,0 +1,8 @@
+*.tsbuildinfo
+.DS_Store
+.eslintcache
+.idea
+.npm
+debug/
+node_modules/
+target/
