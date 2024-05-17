@@ -1,6 +1,7 @@
 use crate::cell::Cell;
 use crate::region::Region;
 use std::collections::HashSet;
+use std::num::ParseIntError;
 
 pub struct Grid {
     dimension: usize,
@@ -165,5 +166,9 @@ impl Grid {
             return false;
         }
         true
+    }
+
+    fn sequence_to_integer(&self, sequence: String) -> Result<u32, ParseIntError> {
+        sequence.parse::<u32>()
     }
 }
