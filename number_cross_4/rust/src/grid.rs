@@ -9,7 +9,7 @@ pub struct Grid {
 }
 
 impl Grid {
-    // Check if the same cell is in multiple regions
+    // Check if any cell is in multiple regions
     fn check_duplicate_cells_in_regions(&self) -> bool {
         let mut cell_set = HashSet::new();
         for region in &self.regions {
@@ -21,6 +21,34 @@ impl Grid {
             }
         }
         false
+    }
+
+    // Check if every cell is in exactly one region and return the missing cells if any
+    fn check_all_cells_in_one_region(&self) -> Result<(), String> {
+        let mut all_cells = HashSet::new();
+        for row in 0..self.dimension {
+            for col in 0..self.dimension {
+                all_cells.insert((row, col));
+            }
+        }
+
+        let mut region_cells = HashSet::new();
+        for region in &self.regions {
+            for &cell in &region.cells {
+                region_cells.insert(cell);
+            }
+        }
+
+        if all_cells == region_cells {
+            Ok(())
+        } else {
+            let mut missing_cells: Vec<_> = all_cells.difference(&region_cells).collect();
+            missing_cells.sort(); // Sort the list of missing cells
+            Err(format!(
+                "The following cell(s) are not in any region: {:?}",
+                missing_cells
+            ))
+        }
     }
 
     // Create a new grid with the given dimension and initial regions
@@ -61,6 +89,11 @@ impl Grid {
         // Check for duplicate cells in regions
         if grid.check_duplicate_cells_in_regions() {
             return Err("Duplicate cells found in multiple regions.".to_string());
+        }
+
+        // Check that every cell is in exactly one region
+        if let Err(e) = grid.check_all_cells_in_one_region() {
+            return Err(e);
         }
 
         Ok(grid)

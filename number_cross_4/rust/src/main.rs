@@ -5,7 +5,7 @@ mod region;
 use crate::grid::Grid;
 
 fn main() {
-    let dimension = 4;
+    let dimension = 7;
 
     // Initial regions configuration
     let initial_regions = vec![
