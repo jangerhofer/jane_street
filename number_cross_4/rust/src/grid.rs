@@ -141,7 +141,7 @@ impl Grid {
         }
     }
 
-    pub fn extract_sequences_from_row(&self, row: usize) -> Vec<String> {
+    fn extract_sequences_from_row(&self, row: usize) -> Vec<String> {
         let mut sequences = Vec::new();
         let mut current_sequence = String::new();
 
@@ -158,5 +158,12 @@ impl Grid {
         }
 
         sequences
+    }
+
+    fn validate_sequence(&self, sequence: String) -> bool {
+        if sequence.len() < 2 || sequence.starts_with('0') {
+            return false;
+        }
+        true
     }
 }

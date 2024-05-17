@@ -37,8 +37,6 @@ fn main() {
             // Display the regions
             println!("\nRegions:");
             grid.display_regions();
-
-            println!("{:?}", grid.extract_sequences_from_row(1));
         }
         Err(e) => {
             println!("Error initializing grid: {}", e);
