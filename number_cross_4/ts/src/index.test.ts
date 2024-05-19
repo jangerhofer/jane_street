@@ -5,20 +5,34 @@ function stubRule() {
 	return true;
 }
 
-describe("valiation", () => {
+describe("validation", () => {
 	describe("shading placement", () => {
-		test("correctly passes", () => {
-			const grid = Grid.from_contents(
-				[[Shaded, 3, 4, 3, Shaded]],
-				[],
-				[stubRule, stubRule, stubRule, stubRule, stubRule],
-			);
+		test("correctly passes -- left/right", () => {
+			const grid = Grid.from_contents([[Shaded, 3, 4, 3, Shaded]]);
 
 			expect(grid.validate()).toEqual(true);
 		});
 
-		test("correctly fails -- right/left", () => {
+		test("correctly passes -- up/down", () => {
+			const grid = Grid.from_contents([
+				[Shaded, 3, 4, 3, Shaded],
+				[3, Shaded, 4, Shaded, 3],
+			]);
+
+			expect(grid.validate()).toEqual(true);
+		});
+
+		test("correctly fails -- left/right", () => {
 			const grid = Grid.from_contents([[Shaded, Shaded, 4, 3, Shaded]]);
+
+			expect(grid.validate()).toEqual(false);
+		});
+
+		test("correctly fails -- up/down", () => {
+			const grid = Grid.from_contents([
+				[9, Shaded, 4, 3, Shaded],
+				[9, Shaded, 4, 3, Shaded],
+			]);
 
 			expect(grid.validate()).toEqual(false);
 		});

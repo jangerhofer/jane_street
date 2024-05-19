@@ -73,8 +73,6 @@ export class Grid {
 					continue;
 				}
 
-				console.log({ column, row });
-
 				// 	Left
 				if (column > 0) {
 					if (this.coords[column - 1][row] === Shaded) {
