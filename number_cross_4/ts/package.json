@@ -1,0 +1,13 @@
+{
+	"devDependencies": {
+		"@biomejs/biome": "1.7.3",
+		"vitest": "^1.6.0"
+	},
+	"scripts": {
+		"check": "biome check --apply .",
+		"format": "biome format --write .",
+		"lint": "biome lint --apply .",
+		"test": "vitest"
+	},
+	"type": "module"
+}
