@@ -217,10 +217,13 @@ export class Grid {
 					const adjacent_cell = this.grid[ny][nx];
 					const adjacent_cell_region = this.current_regions.findIndex(
 						(region) =>
-							region.some(([x, y]) => x === cell.column && y === cell.row),
+							region.some(
+								([x, y]) =>
+									x === adjacent_cell.column && y === adjacent_cell.row,
+							),
 					);
 
-					if (!adjacent_cell_region) {
+					if (adjacent_cell_region === -1) {
 						console.warn(
 							`Cell not in any region: ${adjacent_cell.coordinate_string}`,
 						);

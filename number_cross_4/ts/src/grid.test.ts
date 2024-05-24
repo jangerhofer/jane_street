@@ -136,7 +136,7 @@ describe("validation", () => {
 			});
 		});
 
-		test("only adjacent cells with same value in separate regions", () => {
+		test("only adjacent cells with same value in separate regions -- horizontal", () => {
 			const grid = new Grid(3, [
 				new Region([
 					[0, 0],
@@ -157,10 +157,37 @@ describe("validation", () => {
 			grid.set(1, 0, 5);
 			grid.set(2, 0, 5);
 
-			console.log(grid.toString());
+			expect(grid.validate()).toEqual({
+				isValid: false,
+				reason:
+					"Adjacent cells in different regions share the same value: (0, 0) (1, 0)",
+			});
+		});
+
+		test("only adjacent cells with same value in separate regions -- vertical", () => {
+			const grid = new Grid(3, [
+				new Region([
+					[0, 0],
+					[1, 0],
+					[2, 0],
+				]),
+				new Region([
+					[0, 1],
+					[0, 2],
+					[1, 1],
+					[1, 2],
+					[2, 1],
+					[2, 2],
+				]),
+			]);
+
+			grid.set(0, 0, 5);
+			grid.set(0, 1, 5);
 
 			expect(grid.validate()).toEqual({
 				isValid: false,
+				reason:
+					"Adjacent cells in different regions share the same value: (0, 0) (0, 1)",
 			});
 		});
 	});
