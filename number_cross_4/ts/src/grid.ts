@@ -25,6 +25,14 @@ export class Grid {
 		);
 	}
 
+	set(x: number, y: number, value: Cell) {
+		if (!this.is_valid_coordinate(x, y)) {
+			throw new Error(`(${x},${y}) is not a valid coordinate.`);
+		}
+
+		this.grid[y][x] = value;
+	}
+
 	static from_cells(
 		/**
 		 * Array of columns (rows outer array)
@@ -44,6 +52,63 @@ export class Grid {
 		grid.grid = cells;
 
 		return grid;
+	}
+
+	private get_shaded_cells(): Coordinate[] {
+		const coordinates: Coordinate[] = [];
+
+		for (let row = 0; row < this.dimension; row += 1) {
+			for (let column = 0; column < this.dimension; column += 1) {
+				if (this.grid[row][column] === Shaded) {
+					coordinates.push([column, row]);
+				}
+			}
+		}
+
+		return coordinates;
+	}
+
+	get current_regions(): Coordinate[][] {
+		const dynamic_regions: Coordinate[][] = [];
+		const shaded_cells = this.get_shaded_cells();
+
+		for (const region of this.regions) {
+			const subregions = region.get_subregions(shaded_cells);
+
+			dynamic_regions.push(...subregions);
+		}
+
+		return dynamic_regions;
+	}
+
+	private validate_region() {
+		// Check that all cells in a (sub)region share the same value
+		for (const region of this.current_regions) {
+			let region_value = null;
+			for (const [x, y] of region) {
+				const cell_value = this.grid[y][x];
+
+				if (cell_value === Shaded || cell_value === null) {
+					continue;
+				}
+
+				if (region_value === null) {
+					region_value = cell_value;
+				} else if (region_value !== cell_value) {
+					return {
+						isValid: false,
+						reason: `Region has two or more values: ${String(
+							region_value,
+						)} ${String(cell_value)}`,
+					};
+				}
+			}
+		}
+		// Check that adjacent cells in different regions do not share the same value
+
+		return {
+			isValid: true,
+		};
 	}
 
 	private static validate_sequence(sequence: Sequence) {
@@ -67,6 +132,11 @@ export class Grid {
 		const row_validity = this.validate_rows();
 		if (!row_validity.isValid) {
 			return row_validity;
+		}
+
+		const region_validity = this.validate_region();
+		if (!region_validity.isValid) {
+			return region_validity;
 		}
 
 		return {

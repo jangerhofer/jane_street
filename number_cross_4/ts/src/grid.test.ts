@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { Grid, Shaded } from "./grid.js";
+import { Region } from "./region.js";
 
 describe("validation", () => {
 	describe("shading", () => {
@@ -71,6 +72,63 @@ describe("validation", () => {
 					(number: number) => number % 4 === 0,
 				],
 			);
+
+			expect(grid.validate()).toEqual({
+				isValid: true,
+			});
+		});
+	});
+
+	describe("regions", () => {
+		test("non-matching values in region", () => {
+			const grid = new Grid(3, [
+				new Region([
+					[0, 0],
+					[0, 1],
+					[0, 2],
+				]),
+				new Region([
+					[1, 0],
+					[1, 1],
+					[1, 2],
+					[2, 0],
+					[2, 1],
+					[2, 2],
+				]),
+			]);
+
+			grid.set(0, 1, Shaded);
+
+			grid.set(2, 1, 7);
+			grid.set(2, 2, 5);
+
+			expect(grid.validate()).toEqual({
+				isValid: false,
+				reason: "Region has two or more values: 7 5",
+			});
+		});
+
+		test("only matching & null values in region", () => {
+			const grid = new Grid(3, [
+				new Region([
+					[0, 0],
+					[0, 1],
+					[0, 2],
+				]),
+				new Region([
+					[1, 0],
+					[1, 1],
+					[1, 2],
+					[2, 0],
+					[2, 1],
+					[2, 2],
+				]),
+			]);
+
+			grid.set(0, 1, Shaded);
+
+			grid.set(2, 1, 7);
+			grid.set(2, 2, 7);
 
 			expect(grid.validate()).toEqual({
 				isValid: true,
