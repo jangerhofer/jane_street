@@ -1,10 +1,8 @@
+import { Cell, type Value } from "./cell.js";
 import { directions } from "./direction.js";
-import type { Sequence } from "./index.js";
 import type { Region } from "./region.js";
 
 export type Coordinate = [x: number, y: number];
-export const Shaded = Symbol("Shaded");
-type Cell = null | number | typeof Shaded;
 type RowConstraints = (number: number) => boolean;
 
 export class Grid {
@@ -15,57 +13,14 @@ export class Grid {
 		private regions: Region[] = [],
 		private row_constraints: RowConstraints[] = [],
 	) {
-		this.grid = Array.from({ length: dimension }, () =>
+		this.grid = Array.from({ length: dimension }, (_, row) =>
 			Array.from(
 				{
 					length: this.dimension,
 				},
-				() => null,
+				(_, column) => new Cell(column, row, null),
 			),
 		);
-	}
-
-	set(x: number, y: number, value: Cell) {
-		if (!this.is_valid_coordinate(x, y)) {
-			throw new Error(`(${x},${y}) is not a valid coordinate.`);
-		}
-
-		this.grid[y][x] = value;
-	}
-
-	static from_cells(
-		/**
-		 * Array of columns (rows outer array)
-		 */
-		cells: Cell[][],
-		regions: Region[] = [],
-		row_constraints: RowConstraints[] = [],
-	) {
-		const dimension = cells.length;
-
-		if (!cells.every((row) => row.length === dimension)) {
-			throw new Error("Non-square");
-		}
-
-		const grid = new Grid(dimension, regions, row_constraints);
-
-		grid.grid = cells;
-
-		return grid;
-	}
-
-	private get_shaded_cells(): Coordinate[] {
-		const coordinates: Coordinate[] = [];
-
-		for (let row = 0; row < this.dimension; row += 1) {
-			for (let column = 0; column < this.dimension; column += 1) {
-				if (this.grid[row][column] === Shaded) {
-					coordinates.push([column, row]);
-				}
-			}
-		}
-
-		return coordinates;
 	}
 
 	get current_regions(): Coordinate[][] {
@@ -81,46 +36,47 @@ export class Grid {
 		return dynamic_regions;
 	}
 
-	private validate_region() {
-		// Check that all cells in a (sub)region share the same value
-		for (const region of this.current_regions) {
-			let region_value = null;
-			for (const [x, y] of region) {
-				const cell_value = this.grid[y][x];
+	static from_values(
+		/**
+		 * Array of columns (rows outer array)
+		 */
+		cell_values: Value[][],
+		regions: Region[] = [],
+		row_constraints: RowConstraints[] = [],
+	) {
+		const dimension = cell_values.length;
 
-				if (cell_value === Shaded || cell_value === null) {
-					continue;
-				}
-
-				if (region_value === null) {
-					region_value = cell_value;
-				} else if (region_value !== cell_value) {
-					return {
-						isValid: false,
-						reason: `Region has two or more values: ${String(
-							region_value,
-						)} ${String(cell_value)}`,
-					};
-				}
-			}
+		if (!cell_values.every((row) => row.length === dimension)) {
+			throw new Error("Non-square");
 		}
-		// Check that adjacent cells in different regions do not share the same value
 
-		return {
-			isValid: true,
-		};
+		const grid = new Grid(dimension, regions, row_constraints);
+
+		grid.grid = cell_values.map((columns, row) =>
+			columns.map((cell_value, column) => new Cell(column, row, cell_value)),
+		);
+
+		return grid;
 	}
 
-	private static validate_sequence(sequence: Sequence) {
+	private static validate_sequence(sequence: Cell[]) {
 		if (sequence.length < 2) {
 			throw new Error("Too short");
 		}
 
-		if (sequence[0] === 0) {
+		if (sequence[0].value === 0) {
 			return false;
 		}
 
 		return true;
+	}
+
+	set(x: number, y: number, value: Value) {
+		if (!this.is_valid_coordinate(x, y)) {
+			throw new Error(`(${x},${y}) is not a valid coordinate.`);
+		}
+
+		this.grid[y][x].value = value;
 	}
 
 	validate() {
@@ -144,6 +100,51 @@ export class Grid {
 		};
 	}
 
+	private get_shaded_cells(): Coordinate[] {
+		const coordinates: Coordinate[] = [];
+
+		for (let row = 0; row < this.dimension; row += 1) {
+			for (let column = 0; column < this.dimension; column += 1) {
+				if (this.grid[row][column].is_shaded) {
+					coordinates.push([column, row]);
+				}
+			}
+		}
+
+		return coordinates;
+	}
+
+	private validate_region() {
+		// Check that all cells in a (sub)region share the same value
+		for (const region of this.current_regions) {
+			let region_value = null;
+			for (const [x, y] of region) {
+				const cell = this.grid[y][x];
+
+				if (cell.is_shaded || cell.value === null) {
+					continue;
+				}
+
+				if (region_value === null) {
+					region_value = cell.value;
+				} else if (region_value !== cell.value) {
+					return {
+						isValid: false,
+						reason: `Region has two or more values: ${String(
+							region_value,
+						)} ${String(cell.value)}`,
+					};
+				}
+			}
+		}
+
+		// Check that adjacent cells in different regions do not share the same value
+
+		return {
+			isValid: true,
+		};
+	}
+
 	private get_row(index: number) {
 		if (index < 0 || index >= this.dimension) {
 			throw new Error("Out of bounds");
@@ -159,8 +160,8 @@ export class Grid {
 		let subsequence = [];
 
 		// Deal with leading 0?
-		for (const element of row) {
-			if (element === Shaded) {
+		for (const cell of row) {
+			if (cell.is_shaded) {
 				if (subsequence.length > 0) {
 					subsequences.push(subsequence);
 					subsequence = [];
@@ -169,7 +170,7 @@ export class Grid {
 				continue;
 			}
 
-			if (element === null) {
+			if (cell.is_shaded === null) {
 				if (subsequence.length > 0) {
 					subsequences.push(subsequence);
 					subsequence = [];
@@ -178,7 +179,7 @@ export class Grid {
 				continue;
 			}
 
-			subsequence.push(element);
+			subsequence.push(cell);
 		}
 
 		if (subsequence.length > 0) {
@@ -205,7 +206,9 @@ export class Grid {
 				if (!rule(subsequence_to_number(subsequence))) {
 					return {
 						isValid: false,
-						reason: `Broke rule in row ${row_index}: ${subsequence}`,
+						reason: `Broke rule in row ${row_index}: ${subsequence
+							.map((cell) => `(${cell.column}, ${cell.row})`)
+							.join(", ")}`,
 					};
 				}
 			}
@@ -219,7 +222,7 @@ export class Grid {
 	private validate_shading() {
 		for (let column = 0; column < this.dimension; column += 1) {
 			for (let row = 0; row < this.dimension; row += 1) {
-				const shaded = this.grid[column][row] === Shaded;
+				const shaded = this.grid[column][row].is_shaded;
 
 				if (!shaded) {
 					continue;
@@ -233,7 +236,7 @@ export class Grid {
 						continue;
 					}
 
-					if (this.grid[x][y] === Shaded) {
+					if (this.grid[x][y].is_shaded) {
 						return {
 							isValid: false,
 							reason: "Adjacent `Shaded` cells",
@@ -252,6 +255,6 @@ export class Grid {
 // const grid = new Grid(2, []);
 // console.log(grid);
 
-function subsequence_to_number(sequence: Sequence) {
-	return Number.parseInt(sequence.join(""));
+function subsequence_to_number(sequence: Cell[]) {
+	return Number.parseInt(sequence.map((cell) => cell.value).join(""));
 }

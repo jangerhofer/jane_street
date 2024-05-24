@@ -1,13 +1,13 @@
 export const Shaded = Symbol("Shaded");
-type Value = null | number | typeof Shaded;
+export type Value = null | number | typeof Shaded;
 
 const separator = "__";
 
 export class Cell {
 	constructor(
-		private x: number,
-		private y: number,
-		private value: Value = null,
+		public column: number,
+		public row: number,
+		public value: Value = null,
 	) {}
 
 	static from_key(key: string) {
@@ -17,6 +17,10 @@ export class Cell {
 	}
 
 	get key() {
-		return [this.x, this.y].join(separator);
+		return [this.row, this.column].join(separator);
+	}
+
+	get is_shaded() {
+		return this.value === Shaded;
 	}
 }

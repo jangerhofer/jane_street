@@ -1,11 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { Grid, Shaded } from "./grid.js";
+import { Shaded } from "./cell.js";
+import { Grid } from "./grid.js";
 import { Region } from "./region.js";
 
 describe("validation", () => {
 	describe("shading", () => {
 		test("basic failure -- horizontal", () => {
-			const grid = Grid.from_cells([
+			const grid = Grid.from_values([
 				[Shaded, Shaded],
 				[0, 0],
 			]);
@@ -17,7 +18,7 @@ describe("validation", () => {
 		});
 
 		test("basic failure -- vertical", () => {
-			const grid = Grid.from_cells([
+			const grid = Grid.from_values([
 				[Shaded, 7],
 				[Shaded, 0],
 			]);
@@ -29,7 +30,7 @@ describe("validation", () => {
 		});
 
 		test("basic success", () => {
-			const grid = Grid.from_cells([
+			const grid = Grid.from_values([
 				[Shaded, 0],
 				[0, 0],
 			]);
@@ -42,7 +43,7 @@ describe("validation", () => {
 
 	describe("row constraints", () => {
 		test("basic failure", () => {
-			const grid = Grid.from_cells(
+			const grid = Grid.from_values(
 				[
 					[1, 0],
 					[5, 1],
@@ -56,12 +57,12 @@ describe("validation", () => {
 
 			expect(grid.validate()).toEqual({
 				isValid: false,
-				reason: "Broke rule in row 1: 5,1",
+				reason: "Broke rule in row 1: (0, 1), (1, 1)",
 			});
 		});
 
 		test("basic success", () => {
-			const grid = Grid.from_cells(
+			const grid = Grid.from_values(
 				[
 					[1, 0],
 					[6, 0],
