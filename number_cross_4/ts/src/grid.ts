@@ -250,6 +250,51 @@ export class Grid {
 			isValid: true,
 		};
 	}
+
+	toString(): string {
+		return [this.valuesToString(), this.regionsToString()].join("\n\n");
+	}
+
+	regionsToString(): string {
+		const currentRegions = this.current_regions;
+		const regionMap = new Map<string, string>();
+		const conflictMap = new Map<string, number>();
+
+		currentRegions.forEach((region, index) => {
+			for (const [x, y] of region) {
+				const key = new Cell(x, y, null).key;
+				if (regionMap.has(key)) {
+					regionMap.set(key, "*");
+					conflictMap.set(key, (conflictMap.get(key) || 1) + 1);
+				} else {
+					regionMap.set(key, String(index));
+				}
+			}
+		});
+
+		return Array.from({ length: this.dimension }, (_, y) =>
+			Array.from({ length: this.dimension }, (_, x) => {
+				const key = new Cell(x, y, null).key;
+				return regionMap.get(key) || ".";
+			}).join(" "),
+		).join("\n");
+	}
+
+	valuesToString(): string {
+		return this.grid
+			.map((row) =>
+				row
+					.map((cell) =>
+						cell.value !== null
+							? cell.is_shaded
+								? "X"
+								: String(cell.value)
+							: ".",
+					)
+					.join(" "),
+			)
+			.join("\n");
+	}
 }
 
 // const grid = new Grid(2, []);
