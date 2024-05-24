@@ -135,5 +135,33 @@ describe("validation", () => {
 				isValid: true,
 			});
 		});
+
+		test("only adjacent cells with same value in separate regions", () => {
+			const grid = new Grid(3, [
+				new Region([
+					[0, 0],
+					[0, 1],
+					[0, 2],
+				]),
+				new Region([
+					[1, 0],
+					[1, 1],
+					[1, 2],
+					[2, 0],
+					[2, 1],
+					[2, 2],
+				]),
+			]);
+
+			grid.set(0, 0, 5);
+			grid.set(1, 0, 5);
+			grid.set(2, 0, 5);
+
+			console.log(grid.toString());
+
+			expect(grid.validate()).toEqual({
+				isValid: false,
+			});
+		});
 	});
 });

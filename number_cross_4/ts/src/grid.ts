@@ -1,4 +1,4 @@
-import { Cell, type Value } from "./cell.js";
+import { Cell, Shaded, type Value } from "./cell.js";
 import { directions } from "./direction.js";
 import type { Region } from "./region.js";
 
@@ -100,6 +100,51 @@ export class Grid {
 		};
 	}
 
+	toString(): string {
+		return [this.valuesToString(), this.regionsToString()].join("\n\n");
+	}
+
+	regionsToString(): string {
+		const currentRegions = this.current_regions;
+		const regionMap = new Map<string, string>();
+		const conflictMap = new Map<string, number>();
+
+		currentRegions.forEach((region, index) => {
+			for (const [x, y] of region) {
+				const key = new Cell(x, y, null).key;
+				if (regionMap.has(key)) {
+					regionMap.set(key, "*");
+					conflictMap.set(key, (conflictMap.get(key) || 1) + 1);
+				} else {
+					regionMap.set(key, String(index));
+				}
+			}
+		});
+
+		return Array.from({ length: this.dimension }, (_, y) =>
+			Array.from({ length: this.dimension }, (_, x) => {
+				const key = new Cell(x, y, null).key;
+				return regionMap.get(key) || ".";
+			}).join(" "),
+		).join("\n");
+	}
+
+	valuesToString(): string {
+		return this.grid
+			.map((row) =>
+				row
+					.map((cell) =>
+						cell.value !== null
+							? cell.is_shaded
+								? "X"
+								: String(cell.value)
+							: ".",
+					)
+					.join(" "),
+			)
+			.join("\n");
+	}
+
 	private get_shaded_cells(): Coordinate[] {
 		const coordinates: Coordinate[] = [];
 
@@ -139,6 +184,81 @@ export class Grid {
 		}
 
 		// Check that adjacent cells in different regions do not share the same value
+		for (let y = 0; y < this.dimension; y += 1) {
+			for (let x = 0; x < this.dimension; x += 1) {
+				const cell = this.grid[y][x];
+				const cell_region = this.current_regions.findIndex((region) =>
+					region.some(([x, y]) => x === cell.column && y === cell.row),
+				);
+
+				if (cell_region === -1) {
+					console.warn(`Cell not in any region: ${cell.coordinate_string}`);
+
+					continue;
+				}
+
+				// We check for contiguous Shaded cells elsewhere
+				if (cell.value === Shaded) {
+					continue;
+				}
+
+				if (cell.value === null) {
+					continue;
+				}
+
+				for (const [dx, dy] of directions) {
+					const nx = x + dx;
+					const ny = y + dy;
+
+					if (!this.is_valid_coordinate(nx, ny)) {
+						continue;
+					}
+
+					const adjacent_cell = this.grid[ny][nx];
+					const adjacent_cell_region = this.current_regions.findIndex(
+						(region) =>
+							region.some(([x, y]) => x === cell.column && y === cell.row),
+					);
+
+					if (!adjacent_cell_region) {
+						console.warn(
+							`Cell not in any region: ${adjacent_cell.coordinate_string}`,
+						);
+
+						continue;
+					}
+
+					// We check for contiguous Shaded cells elsewhere
+					if (adjacent_cell.value === Shaded) {
+						continue;
+					}
+
+					if (adjacent_cell.value === null) {
+						continue;
+					}
+
+					const different_regions = cell_region !== adjacent_cell_region;
+					const same_value = cell.value === adjacent_cell.value;
+
+					if (different_regions) {
+						if (same_value) {
+							return {
+								isValid: false,
+								reason: `Adjacent cells in different regions share the same value: ${cell.coordinate_string} ${adjacent_cell.coordinate_string}`,
+							};
+						}
+					} else {
+						if (!same_value) {
+							throw new Error(
+								`Different values in same region leaked: ${String(
+									cell.value,
+								)} !== ${String(adjacent_cell.value)}`,
+							);
+						}
+					}
+				}
+			}
+		}
 
 		return {
 			isValid: true,
@@ -249,51 +369,6 @@ export class Grid {
 		return {
 			isValid: true,
 		};
-	}
-
-	toString(): string {
-		return [this.valuesToString(), this.regionsToString()].join("\n\n");
-	}
-
-	regionsToString(): string {
-		const currentRegions = this.current_regions;
-		const regionMap = new Map<string, string>();
-		const conflictMap = new Map<string, number>();
-
-		currentRegions.forEach((region, index) => {
-			for (const [x, y] of region) {
-				const key = new Cell(x, y, null).key;
-				if (regionMap.has(key)) {
-					regionMap.set(key, "*");
-					conflictMap.set(key, (conflictMap.get(key) || 1) + 1);
-				} else {
-					regionMap.set(key, String(index));
-				}
-			}
-		});
-
-		return Array.from({ length: this.dimension }, (_, y) =>
-			Array.from({ length: this.dimension }, (_, x) => {
-				const key = new Cell(x, y, null).key;
-				return regionMap.get(key) || ".";
-			}).join(" "),
-		).join("\n");
-	}
-
-	valuesToString(): string {
-		return this.grid
-			.map((row) =>
-				row
-					.map((cell) =>
-						cell.value !== null
-							? cell.is_shaded
-								? "X"
-								: String(cell.value)
-							: ".",
-					)
-					.join(" "),
-			)
-			.join("\n");
 	}
 }
 

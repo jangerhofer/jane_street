@@ -23,4 +23,8 @@ export class Cell {
 	get is_shaded() {
 		return this.value === Shaded;
 	}
+
+	get coordinate_string(): string {
+		return `(${this.column}, ${this.row})`;
+	}
 }
