@@ -1,5 +1,5 @@
 import { directions } from "./direction.js";
-import type { Coordinate } from "./index.js";
+import type { Coordinate } from "./grid.js";
 
 export class Region {
 	cells: Coordinate[];

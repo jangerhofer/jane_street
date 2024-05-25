@@ -78,6 +78,26 @@ describe("validation", () => {
 				isValid: true,
 			});
 		});
+
+		test("ignores incomplete sequences (i.e. those with a trailing NULL value)", () => {
+			const grid = Grid.from_values(
+				[
+					[1, 0, null],
+					[6, 0, null],
+					[9, 5, null],
+				],
+				[],
+				[
+					(number: number) => number % 2 === 0,
+					(number: number) => number % 4 === 0,
+					(number: number) => number % 2 === 0,
+				],
+			);
+
+			expect(grid.validate()).toEqual({
+				isValid: true,
+			});
+		});
 	});
 
 	describe("regions", () => {

@@ -61,7 +61,8 @@ export class Grid {
 
 	private static validate_sequence(sequence: Cell[]) {
 		if (sequence.length < 2) {
-			throw new Error("Too short");
+			return false;
+			// throw new Error("Too short");
 		}
 
 		if (sequence[0].value === 0) {
@@ -149,6 +150,131 @@ export class Grid {
 					.join(" "),
 			)
 			.join("\n");
+	}
+
+	can_shade(x: number, y: number): boolean {
+		for (const [dx, dy] of directions) {
+			const nx = x + dx;
+			const ny = y + dy;
+			if (this.is_valid_coordinate(nx, ny) && this.grid[ny][nx].is_shaded) {
+				return false; // Adjacent cells cannot be shaded
+			}
+		}
+		return true;
+	}
+
+	can_place_digit(x: number, y: number, digit: number): boolean {
+		if (digit < 0 || digit > 9) return false; // Digit must be between 0 and 9
+
+		// Ensure all cells in this region can have the same digit
+		const regionIndex = this.regions.findIndex((region) =>
+			region.has_cell(x, y),
+		);
+		if (regionIndex === -1) return false;
+		const region = this.regions[regionIndex];
+
+		for (const [rx, ry] of region.cells) {
+			if (
+				!this.grid[ry][rx].is_shaded &&
+				this.grid[ry][rx].value !== null &&
+				this.grid[ry][rx].value !== digit
+			) {
+				return false; // Other cells in the region already have a different digit
+			}
+		}
+
+		// Check adjacent cells in different regions
+		for (const [dx, dy] of directions) {
+			const nx = x + dx;
+			const ny = y + dy;
+			if (this.is_valid_coordinate(nx, ny)) {
+				const neighbor = this.grid[ny][nx];
+				const neighborRegionIndex = this.regions.findIndex((region) =>
+					region.has_cell(nx, ny),
+				);
+				if (
+					neighborRegionIndex !== -1 &&
+					neighborRegionIndex !== regionIndex &&
+					neighbor.value === digit
+				) {
+					return false; // Adjacent cells in different regions must have different digits
+				}
+			}
+		}
+
+		return true;
+	}
+
+	solve(x = 0, y = 0) {
+		console.log(x, y, "\n", this.toString(), "\n\n\n");
+
+		if (y >= this.dimension) {
+			return this.validate().isValid && this.is_solution();
+		}
+
+		const cell = this.grid[y][x];
+
+		const next_x = (x + 1) % this.dimension;
+		const next_y = next_x === 0 ? y + 1 : y;
+
+		if (cell.value !== null) {
+			console.warn(`Encountered filled cell @ (${x}, ${y})`);
+
+			return this.solve(next_x, next_y);
+		}
+
+		if (this.can_shade(x, y)) {
+			cell.value = Shaded;
+			if (this.validate_shading().isValid && this.solve(next_x, next_y)) {
+				return true;
+			}
+			cell.value = null; // Backtrack
+		}
+
+		// Try placing digits
+		for (let num = 0; num <= 9; num++) {
+			if (this.can_place_digit(x, y, num)) {
+				cell.value = num;
+				if (this.validate().isValid && this.solve(next_x, next_y)) {
+					return true;
+				}
+				cell.value = null; // Backtrack
+			}
+		}
+
+		return false;
+	}
+
+	sum_solution() {
+		const sequences = this.grid.flatMap((_row, row_index) =>
+			this.build_subsequences(row_index),
+		);
+
+		const numbers = sequences.map(subsequence_to_number);
+
+		return numbers.reduce((accum, number) => accum + number, 0);
+	}
+
+	private get_next_traversal_coordinate(x: number, y: number) {
+		let nx = x;
+		let ny = y;
+
+		nx++;
+
+		if (x >= this.dimension) {
+			nx = 0;
+			ny++;
+
+			if (ny >= this.dimension) {
+				// If y exceeds N, it means we've gone past the end of the grid
+				return null; // or throw an error, depending on your needs
+			}
+		}
+
+		return {
+			x: nx,
+			y: ny,
+		};
 	}
 
 	private get_shaded_cells(): Coordinate[] {
@@ -301,7 +427,8 @@ export class Grid {
 
 			if (cell.value === null) {
 				if (subsequence.length > 0) {
-					subsequences.push(subsequence);
+					// Trailing `null` values should cause a sequence to be ignored for validation purposes
+					// subsequences.push(subsequence);
 					subsequence = [];
 				}
 
@@ -375,16 +502,6 @@ export class Grid {
 		return {
 			isValid: true,
 		};
-	}
-
-	sum_solution() {
-		const sequences = this.grid.flatMap((_row, row_index) =>
-			this.build_subsequences(row_index),
-		);
-
-		const numbers = sequences.map(subsequence_to_number);
-
-		return numbers.reduce((accum, number) => accum + number, 0);
 	}
 }
 
