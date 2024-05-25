@@ -376,6 +376,16 @@ export class Grid {
 			isValid: true,
 		};
 	}
+
+	sum_solution() {
+		const sequences = this.grid.flatMap((_row, row_index) =>
+			this.build_subsequences(row_index),
+		);
+
+		const numbers = sequences.map(subsequence_to_number);
+
+		return numbers.reduce((accum, number) => accum + number, 0);
+	}
 }
 
 function subsequence_to_number(sequence: Cell[]) {
