@@ -57,7 +57,7 @@ describe("validation", () => {
 
 			expect(grid.validate()).toEqual({
 				isValid: false,
-				reason: "Broke rule in row 1: (0, 1), (1, 1)",
+				reason: "Broke rule  in row 1: 51",
 			});
 		});
 

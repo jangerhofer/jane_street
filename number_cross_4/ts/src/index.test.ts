@@ -56,7 +56,7 @@ describe("problem example", () => {
 		expect(grid.validate()).toEqual({ isValid: true });
 	});
 
-	test("it identifies solution", () => {
+	test("it validates & identifies solution", () => {
 		const grid = new Grid(
 			5,
 			[
@@ -104,6 +104,8 @@ describe("problem example", () => {
 			],
 		);
 
+		expect(grid.is_solution()).toEqual(false);
+
 		const solution = [
 			[Shaded, 3, 4, 3, Shaded],
 			[1, 3, Shaded, 5, 5],
@@ -119,5 +121,6 @@ describe("problem example", () => {
 		}
 
 		expect(grid.validate()).toEqual({ isValid: true });
+		expect(grid.is_solution()).toEqual(true);
 	});
 });

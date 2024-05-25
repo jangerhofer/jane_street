@@ -100,6 +100,12 @@ export class Grid {
 		};
 	}
 
+	is_solution() {
+		return this.grid.every((row) =>
+			row.every((cell) => Number.isInteger(cell.value) || cell.is_shaded),
+		);
+	}
+
 	toString(): string {
 		return [this.valuesToString(), this.regionsToString()].join("\n\n");
 	}
@@ -124,7 +130,7 @@ export class Grid {
 		return Array.from({ length: this.dimension }, (_, y) =>
 			Array.from({ length: this.dimension }, (_, x) => {
 				const key = new Cell(x, y, null).key;
-				return regionMap.get(key) || ".";
+				return regionMap.get(key) || "+";
 			}).join(" "),
 		).join("\n");
 	}
@@ -136,7 +142,7 @@ export class Grid {
 					.map((cell) =>
 						cell.value !== null
 							? cell.is_shaded
-								? "X"
+								? "+"
 								: String(cell.value)
 							: ".",
 					)
@@ -328,9 +334,9 @@ export class Grid {
 				if (!rule(subsequence_to_number(subsequence))) {
 					return {
 						isValid: false,
-						reason: `Broke rule in row ${row_index}: ${subsequence
-							.map((cell) => `(${cell.column}, ${cell.row})`)
-							.join(", ")}`,
+						reason: `Broke rule ${
+							rule.name
+						} in row ${row_index}: ${subsequence_to_number(subsequence)}`,
 					};
 				}
 			}
