@@ -196,7 +196,7 @@ describe("problem example", () => {
 		expect(grid.sum_solution()).toEqual(24898);
 	});
 
-	test.skip("solves correctly", () => {
+	test("solves correctly", () => {
 		const grid = new Grid(
 			5,
 			[
@@ -246,13 +246,11 @@ describe("problem example", () => {
 
 		expect(grid.is_solution()).toEqual(false);
 
-		console.log(">>>>", grid.solve(), grid.validate());
+		expect(grid.solve()).toBe(true);
 
-		console.log(grid.toString());
+		expect(grid.validate()).toEqual({ isValid: true });
+		expect(grid.is_solution()).toEqual(true);
 
-		// expect(grid.validate()).toEqual({ isValid: true });
-		// expect(grid.is_solution()).toEqual(true);
-		//
-		// expect(grid.sum_solution()).toEqual(24898);
+		expect(grid.sum_solution()).toEqual(24898);
 	});
 });

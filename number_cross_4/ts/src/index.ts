@@ -64,4 +64,4 @@ const grid = new Grid(
 	],
 );
 
-grid.solve();
+console.log(grid.solve());

@@ -108,7 +108,7 @@ export class Grid {
 	}
 
 	toString(): string {
-		return [this.valuesToString(), this.regionsToString()].join("\n\n");
+		return [this.valuesToString(), this.regionsToString()].join("\n-----\n");
 	}
 
 	regionsToString(): string {
@@ -167,13 +167,13 @@ export class Grid {
 		if (digit < 0 || digit > 9) return false; // Digit must be between 0 and 9
 
 		// Ensure all cells in this region can have the same digit
-		const regionIndex = this.regions.findIndex((region) =>
-			region.has_cell(x, y),
+		const regionIndex = this.current_regions.findIndex((region) =>
+			region.some((cell) => cell[0] === x && cell[1] === y),
 		);
 		if (regionIndex === -1) return false;
-		const region = this.regions[regionIndex];
+		const region = this.current_regions[regionIndex];
 
-		for (const [rx, ry] of region.cells) {
+		for (const [rx, ry] of region) {
 			if (
 				!this.grid[ry][rx].is_shaded &&
 				this.grid[ry][rx].value !== null &&
@@ -189,8 +189,8 @@ export class Grid {
 			const ny = y + dy;
 			if (this.is_valid_coordinate(nx, ny)) {
 				const neighbor = this.grid[ny][nx];
-				const neighborRegionIndex = this.regions.findIndex((region) =>
-					region.has_cell(nx, ny),
+				const neighborRegionIndex = this.current_regions.findIndex((region) =>
+					region.some((cell) => cell[0] === x && cell[1] === y),
 				);
 				if (
 					neighborRegionIndex !== -1 &&
@@ -206,8 +206,6 @@ export class Grid {
 	}
 
 	solve(x = 0, y = 0) {
-		console.log(x, y, "\n", this.toString(), "\n\n\n");
-
 		if (y >= this.dimension) {
 			return this.validate().isValid && this.is_solution();
 		}
