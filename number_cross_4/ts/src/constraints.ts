@@ -4,11 +4,15 @@ export const example_row_constraints = {
 	},
 
 	isFib(number) {
-		if (![0, 1, 2, 3, 5, 8].includes(number)) {
-			return false;
+		function isPerfectSquare(x: number): boolean {
+			const s = Math.sqrt(x);
+			return s === Math.floor(s);
 		}
 
-		return true;
+		return (
+			isPerfectSquare(5 * number * number + 4) ||
+			isPerfectSquare(5 * number * number - 4)
+		);
 	},
 
 	isMultipleOf5(number) {
