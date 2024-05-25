@@ -223,8 +223,10 @@ export class Grid {
 
 		if (this.can_shade(x, y)) {
 			cell.value = Shaded;
-			if (this.validate_shading().isValid && this.solve(next_x, next_y)) {
-				return true;
+			if (this.validate_shading().isValid) {
+				if (this.solve(next_x, next_y)) {
+					return true;
+				}
 			}
 			cell.value = null; // Backtrack
 		}

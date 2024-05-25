@@ -1,4 +1,4 @@
-import { example_row_constraints } from "./constraints/example.js";
+import { example } from "./constraints/example.js";
 import { Grid } from "./grid.js";
 import { Region } from "./region.js";
 
@@ -56,11 +56,11 @@ const grid = new Grid(
 		]),
 	],
 	[
-		example_row_constraints.isPowerOf7,
-		example_row_constraints.isFib,
-		example_row_constraints.isMultipleOf5,
-		example_row_constraints.isCube,
-		example_row_constraints.isPalindrome,
+		example.isPowerOf7,
+		example.isFib,
+		example.isMultipleOf5,
+		example.isCube,
+		example.isPalindrome,
 	],
 );
 

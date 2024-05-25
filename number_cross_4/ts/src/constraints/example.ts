@@ -1,4 +1,4 @@
-export const example_row_constraints = {
+export const example = {
 	isCube(number) {
 		if (number < 0) return false;
 
@@ -68,35 +68,35 @@ if (import.meta.vitest) {
 	describe("palindrome", () => {
 		test("true positives", () => {
 			// Odd length
-			expect(example_row_constraints.isPalindrome(101)).toBe(true);
-			expect(example_row_constraints.isPalindrome(191)).toBe(true);
-			expect(example_row_constraints.isPalindrome(202)).toBe(true);
+			expect(example.isPalindrome(101)).toBe(true);
+			expect(example.isPalindrome(191)).toBe(true);
+			expect(example.isPalindrome(202)).toBe(true);
 
 			//     Even length
-			expect(example_row_constraints.isPalindrome(2002)).toBe(true);
+			expect(example.isPalindrome(2002)).toBe(true);
 		});
 
 		test("true negatives", () => {
 			// Odd length
-			expect(example_row_constraints.isPalindrome(102)).toBe(false);
-			expect(example_row_constraints.isPalindrome(203)).toBe(false);
+			expect(example.isPalindrome(102)).toBe(false);
+			expect(example.isPalindrome(203)).toBe(false);
 
 			//     Even length
-			expect(example_row_constraints.isPalindrome(2004)).toBe(false);
-			expect(example_row_constraints.isPalindrome(2008)).toBe(false);
+			expect(example.isPalindrome(2004)).toBe(false);
+			expect(example.isPalindrome(2008)).toBe(false);
 		});
 	});
 
 	describe("power of seven", () => {
 		test("true positives", () => {
-			expect(example_row_constraints.isPowerOf7(49)).toBe(true);
-			expect(example_row_constraints.isPowerOf7(343)).toBe(true);
-			expect(example_row_constraints.isPowerOf7(282475249)).toBe(true);
+			expect(example.isPowerOf7(49)).toBe(true);
+			expect(example.isPowerOf7(343)).toBe(true);
+			expect(example.isPowerOf7(282475249)).toBe(true);
 		});
 
 		test("true negatives", () => {
 			// expect(() => example_row_constraints.isPowerOf7(6)).toThrowError();
-			expect(example_row_constraints.isPowerOf7(50)).toBe(false);
+			expect(example.isPowerOf7(50)).toBe(false);
 		});
 	});
 }

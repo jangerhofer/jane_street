@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { Shaded } from "./cell.js";
-import { example_row_constraints } from "./constraints/example.js";
+import * as Constraints from "./constraints";
 import { Grid } from "./grid.js";
 import { Region } from "./region.js";
 
@@ -45,11 +45,11 @@ describe("problem example", () => {
 				]),
 			],
 			[
-				example_row_constraints.isPowerOf7,
-				example_row_constraints.isFib,
-				example_row_constraints.isMultipleOf5,
-				example_row_constraints.isCube,
-				example_row_constraints.isPalindrome,
+				Constraints.example.isPowerOf7,
+				Constraints.example.isFib,
+				Constraints.example.isMultipleOf5,
+				Constraints.example.isCube,
+				Constraints.example.isPalindrome,
 			],
 		);
 
@@ -96,11 +96,11 @@ describe("problem example", () => {
 				]),
 			],
 			[
-				example_row_constraints.isPowerOf7,
-				example_row_constraints.isFib,
-				example_row_constraints.isMultipleOf5,
-				example_row_constraints.isCube,
-				example_row_constraints.isPalindrome,
+				Constraints.example.isPowerOf7,
+				Constraints.example.isFib,
+				Constraints.example.isMultipleOf5,
+				Constraints.example.isCube,
+				Constraints.example.isPalindrome,
 			],
 		);
 
@@ -165,11 +165,11 @@ describe("problem example", () => {
 				]),
 			],
 			[
-				example_row_constraints.isPowerOf7,
-				example_row_constraints.isFib,
-				example_row_constraints.isMultipleOf5,
-				example_row_constraints.isCube,
-				example_row_constraints.isPalindrome,
+				Constraints.example.isPowerOf7,
+				Constraints.example.isFib,
+				Constraints.example.isMultipleOf5,
+				Constraints.example.isCube,
+				Constraints.example.isPalindrome,
 			],
 		);
 
@@ -236,11 +236,11 @@ describe("problem example", () => {
 				]),
 			],
 			[
-				example_row_constraints.isPowerOf7,
-				example_row_constraints.isFib,
-				example_row_constraints.isMultipleOf5,
-				example_row_constraints.isCube,
-				example_row_constraints.isPalindrome,
+				Constraints.example.isPowerOf7,
+				Constraints.example.isFib,
+				Constraints.example.isMultipleOf5,
+				Constraints.example.isCube,
+				Constraints.example.isPalindrome,
 			],
 		);
 
@@ -418,13 +418,25 @@ describe("problem ", () => {
 					[10, 10],
 				]),
 			],
-			[],
+			[
+				Constraints.problem.square,
+				Constraints.problem.palindrome_more_1,
+				Constraints.problem.prime_to_prime_power,
+				Constraints.problem.digits_7_sum,
+				Constraints.problem.is_fib,
+				Constraints.problem.square,
+				Constraints.problem.multiple_of_37,
+				Constraints.problem.palindrome_and_multiple_of_23,
+				Constraints.problem.digits_product_ends_in_1,
+				Constraints.problem.multiple_of_88,
+				Constraints.problem.is_1_less_than_palindrome,
+			],
 		);
 
 		expect(grid.is_solution()).toEqual(false);
 
 		// expect(grid.solve()).toBe(true);
-		// grid.solve();
+		grid.solve();
 
 		console.log(grid.toString());
 		// expect(grid.validate()).toEqual({ isValid: true });
