@@ -342,17 +342,15 @@ export class Grid {
 	}
 
 	private validate_shading() {
-		for (let column = 0; column < this.dimension; column += 1) {
-			for (let row = 0; row < this.dimension; row += 1) {
-				const shaded = this.grid[column][row].is_shaded;
-
-				if (!shaded) {
+		for (const row of this.grid) {
+			for (const cell of row) {
+				if (!cell.is_shaded) {
 					continue;
 				}
 
 				for (const [dx, dy] of directions) {
-					const x = column + dx;
-					const y = row + dy;
+					const x = cell.column + dx;
+					const y = cell.row + dy;
 
 					if (!this.is_valid_coordinate(x, y)) {
 						continue;
