@@ -322,7 +322,7 @@ export class Grid {
 				);
 
 				if (cell_region === -1) {
-					console.warn(`Cell not in any region: ${cell.coordinate_string}`);
+					// console.warn(`Cell not in any region: ${cell.coordinate_string}`);
 
 					continue;
 				}

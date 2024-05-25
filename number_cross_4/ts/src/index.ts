@@ -1,4 +1,4 @@
-import { example_row_constraints } from "./constraints.js";
+import { example_row_constraints } from "./constraints/example.js";
 import { Grid } from "./grid.js";
 import { Region } from "./region.js";
 
