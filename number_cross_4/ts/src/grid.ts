@@ -307,7 +307,6 @@ export class Grid {
 
 		if (subsequence.length > 0) {
 			subsequences.push(subsequence);
-			subsequence = [];
 		}
 
 		return subsequences;
@@ -359,7 +358,7 @@ export class Grid {
 						continue;
 					}
 
-					if (this.grid[x][y].is_shaded) {
+					if (this.grid[y][x].is_shaded) {
 						return {
 							isValid: false,
 							reason: "Adjacent `Shaded` cells",
@@ -374,9 +373,6 @@ export class Grid {
 		};
 	}
 }
-
-// const grid = new Grid(2, []);
-// console.log(grid);
 
 function subsequence_to_number(sequence: Cell[]) {
 	return Number.parseInt(sequence.map((cell) => cell.value).join(""));
