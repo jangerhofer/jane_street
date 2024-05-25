@@ -1,6 +1,9 @@
 export const example_row_constraints = {
 	isCube(number) {
-		return number ** (1 / 3) % 1 === 0;
+		if (number < 0) return false;
+
+		const cubeRoot = Math.cbrt(number);
+		return Math.round(cubeRoot) ** 3 === number;
 	},
 
 	isFib(number) {
