@@ -293,7 +293,7 @@ export class Grid {
 				continue;
 			}
 
-			if (cell.is_shaded === null) {
+			if (cell.value === null) {
 				if (subsequence.length > 0) {
 					subsequences.push(subsequence);
 					subsequence = [];
