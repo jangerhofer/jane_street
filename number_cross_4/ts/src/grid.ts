@@ -8,6 +8,9 @@ type RowConstraints = (number: number) => boolean;
 export class Grid {
 	private grid: Cell[][];
 
+	private changes = 0;
+	private unlogged_changes = 0;
+
 	constructor(
 		private dimension: number,
 		private regions: Region[] = [],
@@ -21,6 +24,18 @@ export class Grid {
 				(_, column) => new Cell(column, row, null),
 			),
 		);
+
+		for (const row of this.grid) {
+			for (const cell of row) {
+				const in_at_least_one_region = regions.some((region) =>
+					region.has_cell(cell.column, cell.row),
+				);
+
+				if (!in_at_least_one_region) {
+					throw new Error(`No region found for ${cell.coordinate_string}`);
+				}
+			}
+		}
 	}
 
 	get current_regions(): Coordinate[][] {
@@ -205,7 +220,7 @@ export class Grid {
 		return true;
 	}
 
-	solve(x = 0, y = 0) {
+	solve(x = 0, y = 0): boolean {
 		if (y >= this.dimension) {
 			return this.validate().isValid && this.is_solution();
 		}
@@ -222,23 +237,31 @@ export class Grid {
 		}
 
 		if (this.can_shade(x, y)) {
-			cell.value = Shaded;
+			this.set_cell_value(cell.column, cell.row, Shaded);
+			// cell.value = Shaded;
+
 			if (this.validate_shading().isValid) {
 				if (this.solve(next_x, next_y)) {
 					return true;
 				}
 			}
-			cell.value = null; // Backtrack
+
+			this.set_cell_value(cell.column, cell.row, null);
+			// cell.value = null; // Backtrack
 		}
 
 		// Try placing digits
 		for (let num = 0; num <= 9; num++) {
 			if (this.can_place_digit(x, y, num)) {
-				cell.value = num;
+				this.set_cell_value(cell.column, cell.row, num);
+				// cell.value = num;
+
 				if (this.validate().isValid && this.solve(next_x, next_y)) {
 					return true;
 				}
-				cell.value = null; // Backtrack
+
+				this.set_cell_value(cell.column, cell.row, null);
+				// cell.value = null; // Backtrack
 			}
 		}
 
@@ -253,28 +276,6 @@ export class Grid {
 		const numbers = sequences.map(subsequence_to_number);
 
 		return numbers.reduce((accum, number) => accum + number, 0);
-	}
-
-	private get_next_traversal_coordinate(x: number, y: number) {
-		let nx = x;
-		let ny = y;
-
-		nx++;
-
-		if (x >= this.dimension) {
-			nx = 0;
-			ny++;
-
-			if (ny >= this.dimension) {
-				// If y exceeds N, it means we've gone past the end of the grid
-				return null; // or throw an error, depending on your needs
-			}
-		}
-
-		return {
-			x: nx,
-			y: ny,
-		};
 	}
 
 	private get_shaded_cells(): Coordinate[] {
@@ -319,12 +320,17 @@ export class Grid {
 		for (let y = 0; y < this.dimension; y += 1) {
 			for (let x = 0; x < this.dimension; x += 1) {
 				const cell = this.grid[y][x];
+
+				if (cell.is_shaded) {
+					continue;
+				}
+
 				const cell_region = this.current_regions.findIndex((region) =>
 					region.some(([x, y]) => x === cell.column && y === cell.row),
 				);
 
 				if (cell_region === -1) {
-					// console.warn(`Cell not in any region: ${cell.coordinate_string}`);
+					console.warn(`Cell not in any region: ${cell.coordinate_string}`);
 
 					continue;
 				}
@@ -347,6 +353,11 @@ export class Grid {
 					}
 
 					const adjacent_cell = this.grid[ny][nx];
+
+					if (adjacent_cell.is_shaded) {
+						continue;
+					}
+
 					const adjacent_cell_region = this.current_regions.findIndex(
 						(region) =>
 							region.some(
@@ -398,6 +409,23 @@ export class Grid {
 		return {
 			isValid: true,
 		};
+	}
+
+	private set_cell_value(x: number, y: number, value: Value) {
+		if (!this.is_valid_coordinate(x, y)) {
+			throw new Error(`Out of bounds: ${x}, ${y}`);
+		}
+
+		this.changes += 1;
+		this.unlogged_changes += 1;
+
+		if (this.unlogged_changes > 10) {
+			console.log(this.valuesToString());
+
+			this.unlogged_changes = 0;
+		}
+
+		this.grid[y][x].value = value;
 	}
 
 	private get_row(index: number) {

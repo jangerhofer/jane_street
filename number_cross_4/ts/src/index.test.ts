@@ -267,8 +267,8 @@ describe("problem ", () => {
 					[0, 3],
 					[0, 4],
 					[0, 5],
-					[0, 1],
-					[0, 2],
+					[1, 0],
+					[2, 0],
 				]),
 
 				new Region([
@@ -420,7 +420,7 @@ describe("problem ", () => {
 			],
 			[
 				Constraints.problem.square,
-				Constraints.problem.palindrome_more_1,
+				Constraints.problem.is_1_more_than_palindrome,
 				Constraints.problem.prime_to_prime_power,
 				Constraints.problem.digits_7_sum,
 				Constraints.problem.is_fib,
